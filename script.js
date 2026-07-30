@@ -1,6 +1,5 @@
 (function () {
   const root = document.documentElement;
-  root.classList.add('js');
   const nav = document.getElementById('nav');
   const themeToggle = document.getElementById('themeToggle');
   const imageDay = document.getElementById('imageDay');
@@ -14,7 +13,7 @@
     imageDay?.classList.toggle('is-active', nextTheme === 'day');
     imageNight?.classList.toggle('is-active', nextTheme === 'dusk');
     themeToggle?.setAttribute('aria-pressed', String(nextTheme === 'dusk'));
-    themeToggle?.setAttribute('aria-label', nextTheme === 'dusk' ? '切换到黄昏模式' : '切换到夜间模式');
+    themeToggle?.setAttribute('aria-label', nextTheme === 'dusk' ? '切换到日间模式' : '切换到夜间模式');
   };
 
   const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dusk' : 'day';
@@ -36,6 +35,7 @@
   if (reduceMotion || !('IntersectionObserver' in window)) {
     reveals.forEach((element) => element.classList.add('in'));
   } else {
+    root.classList.add('reveal-ready');
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
@@ -44,6 +44,15 @@
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -7% 0px' });
 
+    const revealAll = () => reveals.forEach((element) => element.classList.add('in'));
+    const revealWhenVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      revealAll();
+      document.removeEventListener('visibilitychange', revealWhenVisible);
+    };
+
     reveals.forEach((element) => observer.observe(element));
+    window.setTimeout(revealAll, 8000);
+    document.addEventListener('visibilitychange', revealWhenVisible);
   }
 })();
